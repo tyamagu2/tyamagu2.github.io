@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>tyamagu2.xyz</title>
+    <link>http://tyamagu2.xyz/</link>
+    <description>Recent content on tyamagu2.xyz</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Sun, 27 Dec 2015 16:21:48 +0900</lastBuildDate>
+    <atom:link href="http://tyamagu2.xyz/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>テスト投稿</title>
+      <link>http://tyamagu2.xyz/articles/test/</link>
+      <pubDate>Sun, 27 Dec 2015 16:21:48 +0900</pubDate>
+      
+      <guid>http://tyamagu2.xyz/articles/test/</guid>
+      <description>&lt;p&gt;テストテスト&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://yahoo.co.jp&#34;&gt;Yahoo!&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
