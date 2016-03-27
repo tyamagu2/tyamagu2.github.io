@@ -10,14 +10,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="author" content="Tomoki Yamaguchi">
   <meta property="og:site_name" content="tyamagu2.xyz">
-  <meta property="og:url" content="http://tyamagu2.xyz/articles/test/">
+  <meta property="og:url" content="http://localhost:1313/articles/test/">
   
     <meta property="og:type" content="article" />
     <meta property="og:article:author" content="Tomoki Yamaguchi" />
     <meta property="og:title" content="テスト投稿">
     <meta property="og:article:published_time" content="2015-12-27T16:21:48&#43;09:00" />
   
-  <link rel="canonical" href="http://tyamagu2.xyz/articles/test/" />
+  <link rel="canonical" href="http://localhost:1313/articles/test/" />
+  <link href="" rel="alternate" type="application/rss+xml" title="tyamagu2.xyz" />
+  <link href="" rel="feed" type="application/rss+xml" title="tyamagu2.xyz" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -27,9 +29,10 @@
     <header id="site-header">
   <div class="container">
     <h1 class="site-title">
-      <a href="http://tyamagu2.xyz" alt="tyamagu2.xyz">tyamagu2.xyz</a>
+      <a href="http://localhost:1313/" alt="tyamagu2.xyz">tyamagu2.xyz</a>
     </h1>
     <p class="pull-right header-links">
+      <a href="" type="application/rss+xml" target="_blank"><i class="fa fa-rss"></i></a>
       <a href="https://github.com/tyamagu2"><i class="fa fa-github"></i></a>
       <a href="https://twitter.com/tyamagu2"><i class="fa fa-twitter"></i></a>
     </p>
@@ -39,7 +42,7 @@
     <main class="container">
       <article>
         <header class="article-header">
-          <h2><a href="http://tyamagu2.xyz/articles/test/">テスト投稿</a></h2>
+          <h2><a href="http://localhost:1313/articles/test/">テスト投稿</a></h2>
           <p class="article-pubtime">December 27, 2015</p>
         </header>
         <div class="article-body">
@@ -57,7 +60,6 @@
     <footer id="site-footer">
   <div class="container">
     <hr>
-    <section>&copy; 2015 <a href="http://tyamagu2.xyz">Tomoki Yamaguchi</a><section>
   </div>
 </footer>
 
@@ -90,5 +92,8 @@
   }(document, "script", "twitter-wjs"));
 </script>
 
-  </body>
+  <script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body>
 </html>

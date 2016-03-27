@@ -6,18 +6,120 @@
     <description>Recent content in Articles on tyamagu2.xyz</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Sun, 27 Dec 2015 16:21:48 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 27 Mar 2016 10:46:59 +0900</lastBuildDate>
     <atom:link href="http://tyamagu2.xyz/articles/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>テスト投稿</title>
-      <link>http://tyamagu2.xyz/articles/test/</link>
-      <pubDate>Sun, 27 Dec 2015 16:21:48 +0900</pubDate>
+      <title>numpy で Neural Network</title>
+      <link>http://tyamagu2.xyz/articles/handwritten_digits_recognition/</link>
+      <pubDate>Sun, 27 Mar 2016 10:46:59 +0900</pubDate>
       
-      <guid>http://tyamagu2.xyz/articles/test/</guid>
-      <description>&lt;p&gt;テストテスト&lt;/p&gt;
+      <guid>http://tyamagu2.xyz/articles/handwritten_digits_recognition/</guid>
+      <description>
 
-&lt;p&gt;&lt;a href=&#34;http://yahoo.co.jp&#34;&gt;Yahoo!&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;1月から &lt;a href=&#34;https://www.coursera.org/learn/machine-learning/&#34;&gt;Coursera の Machine Learning のコース&lt;/a&gt;を受講していて、先日すべての課題を提出した。
+前評判通り、分かりやすくてとても良いコースだった。&lt;/p&gt;
+
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://gyazo.com/d85bca5456116786cd7fa9e8b2a4f99c&#34;&gt;&lt;img src=&#34;https://i.gyazo.com/d85bca5456116786cd7fa9e8b2a4f99c.png&#34; alt=&#34;https://gyazo.com/d85bca5456116786cd7fa9e8b2a4f99c&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+
+&lt;p&gt;このコースでは &lt;a href=&#34;https://www.gnu.org/software/octave/&#34;&gt;GNU Octave&lt;/a&gt; を使うんだけど、
+やっぱり numpy つかってやってみたいよねー、ってことで、復習も兼ねて numpy で Neural Network を作ってみた。&lt;/p&gt;
+
+&lt;p&gt;最終結果は github と heroku にあげておいた。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/tyamagu2/nnhw&#34;&gt;https://github.com/tyamagu2/nnhw&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://nnhw.herokuapp.com/&#34;&gt;https://nnhw.herokuapp.com/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;neural-network-で学習:2e46c32abf32e1beef0fa0df88b28661&#34;&gt;Neural Network で学習&lt;/h3&gt;
+
+&lt;p&gt;題材はコースと同じく手書きの数字認識。学習データには定番の &lt;a href=&#34;http://yann.lecun.com/exdb/mnist/&#34;&gt;MNIST のデータセット&lt;/a&gt;を使った。&lt;/p&gt;
+
+&lt;p&gt;Neural Network の構成は input layer、hidden layer 1 つ、output layer の 3 層。
+input layer には 28 x 28 の画像をそのまま渡すことにしたので、bias unit も合わせて 28 * 28 + 1 = 785 ユニット。
+feature reduction とかはやってない。
+hidden layer は 30 ~ 100 ユニットぐらいで試してみた。output layer は数字の分の 10 ユニット。
+Regularization の lambda とか learning rate はいくつか試して適当に決めてしまった。あんまり検証はしてない。&lt;/p&gt;
+
+&lt;p&gt;最初は batch gradient descent、つまり全学習データを一気に Neural Network に丸投げしていたんだけど、
+それだと全然精度が出なかったので、mini-batch gradient descent で 500 個ずつ画像を渡すようにした。
+batch gradient descent の時もコスト関数は収束しているようだったので、local optima にハマったのかなー。&lt;/p&gt;
+
+&lt;p&gt;そんな感じで自分の MacBook Pro で 20 分も学習させたところ、MNIST のテストセットで 90 ~ 95% ぐらいは精度が出た。
+ちなみに、数字ごとの各ピクセルの平均値を出して、ピクセルごとの差分を使って最小二乗法で分類、
+というシンプルなやり方だと 82% ぐらい。なのでそれよりはマシな結果になった。&lt;/p&gt;
+
+&lt;h3 id=&#34;手書き文字を-canvas-で入力:2e46c32abf32e1beef0fa0df88b28661&#34;&gt;手書き文字を Canvas で入力&lt;/h3&gt;
+
+&lt;p&gt;やっぱりインタラクティブじゃないとねー、ということで、Canvas に書いた文字を認識させるようにした。
+Canvas の内容を 28 x 28 にダウンサイズして Neural Network に渡している。
+Web アプリのフレームワークには flask を使ってみた。
+本当はダウンサイズした画像を表示したり、output layer の数値を表示したり、とかやろうかと思ったけど、
+フロントエンドでいい感じに表示するのもめんどくさくて、シンプルに結果だけ表示することにした。&lt;/p&gt;
+
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://camo.githubusercontent.com/8d63997affda3ed7108119e2ac513af5f52279c3/687474703a2f2f692e696d6775722e636f6d2f6f4978614931422e676966&#34; alt=&#34;gif&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;実際には上の gif のようにバッチリ分類はしてくれない。それでも、ピクセルごとの差分の最小二乗法よりはマシな精度になったけど。&lt;/p&gt;
+
+&lt;h3 id=&#34;heroku-にデプロイ:2e46c32abf32e1beef0fa0df88b28661&#34;&gt;Heroku にデプロイ&lt;/h3&gt;
+
+&lt;p&gt;せっかくなので Heroku にデプロイすることにしたけど、ここで予定外と時間を使ってしまった。&lt;/p&gt;
+
+&lt;p&gt;実は今回の Neural Network では scipy も使っている。
+具体的には、sigmoid 関数として &lt;code&gt;scipy.special.expit&lt;/code&gt; を使っている。そこだけ。
+これは &lt;code&gt;1.0 / (1.0  + np.exp(-x))&lt;/code&gt; ってやれば numpy でも計算できる。
+でも x がある程度大きい負の数だと &lt;code&gt;np.exp(-x)&lt;/code&gt; がオーバーフローしてしまって精度が出なかった。
+&lt;code&gt;math.exp(-x)&lt;/code&gt; でも同様だった。&lt;/p&gt;
+
+&lt;p&gt;そういうわけで、heroku でも scipy をインストールしないといけないんだけど、試しに deploy したら、
+heroku には scipy をインストール出来ないと言われてしまった。
+調べたら &lt;a href=&#34;https://devcenter.heroku.com/articles/python-c-deps&#34;&gt;third party 製の buildpack を使えよ&lt;/a&gt;、とのことだったので、
+&lt;a href=&#34;https://github.com/kennethreitz/conda-buildpack&#34;&gt;conda-buildpack&lt;/a&gt; なるものを使うことにした。
+そうすると今度は conda というパッケージマネージャーを使う必要が出てきた。
+それまでは全部 pip で管理してたので、pyenv で miniconda を入れて、conda でパッケージインストールして、
+とやったところ、今度は flask が起動しなくなった。werkzeug がインストール済みなのにインポートできないと言われた。
+しょうがないから flask は pip で管理して、numpy と scipy は conda で管理することにした。&lt;/p&gt;
+
+&lt;p&gt;さて改めて heroku にデプロイ、したら今度は slug size が 300MB を超えてデプロイできなかった。
+調べていたら&lt;a href=&#34;https://github.com/kennethreitz/conda-buildpack/issues/21&#34;&gt;こんな Issue&lt;/a&gt; が見つかった。
+&lt;a href=&#34;https://www.continuum.io/blog/developer-blog/anaconda-25-release-now-mkl-optimizations&#34;&gt;この Announcement&lt;/a&gt; にも色々書いてあるけど、
+mkl optimized な numpy/scipy を、optimize されてない nomkl version の numpy/scipy にしたらサイズが小さくなるので大丈夫とのこと。
+というわけで nomkl 版にしてデプロイ成功。&lt;/p&gt;
+
+&lt;h3 id=&#34;感想:2e46c32abf32e1beef0fa0df88b28661&#34;&gt;感想&lt;/h3&gt;
+
+&lt;p&gt;やっぱり実データだと全然精度が出ない。どこかにしょーもないバグがあるかもしれないけど、まあこんなもんなんだろうなと思う。&lt;/p&gt;
+
+&lt;p&gt;いくつか推測した原因：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;学習データの偏り&lt;br&gt;
+いくつか学習データを表示してみた感じだと、日本人の書く数字とはちょっと感じが違う気がした。
+たまたま表示したデータがそうなのかもしれないし、実際のところは分からない。
+もっと regularization の lambda の調整が必要なのかもしれないし、さらに学習データを増やすべきなのかもしれない。&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;入力画像のプリプロセス不足&lt;br&gt;
+不足というか何もしてない。中心やサイズの調整をしてあげると結果も違ってきそう。&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;結局実用まで持って行くには、lambda や hidden layer の数やユニット数などのパラメータの調整、
+それを助けるためのグラフを書いたりするスクリプト、実用的な速度を出すための feature selection、
+色々な学習データの収集やらプリプロセスなどの泥臭い作業、なんかが必要になってくるんだろうなーと思った。
+当然だけど Machine Learning とか Neural Network とか Deep Learning とかの響きに惹かれてるだけじゃ難しいですね。
+数学ももっと勉強しないと。&lt;/p&gt;
+
+&lt;p&gt;MNIST は簡単すぎるので、&lt;a href=&#34;https://www.cs.toronto.edu/~kriz/cifar.html&#34;&gt;CIFAR-10&lt;/a&gt; というデータセットでやってみると良いと教えてもらった。
+こっちだと 50% ぐらいしかでない。これで 90% 出せたらすごいらしい。&lt;/p&gt;
+
+&lt;p&gt;あと &lt;a href=&#34;http://neuralnetworksanddeeplearning.com/&#34;&gt;Neural Networks and Deep Learning&lt;/a&gt; っていう Online Book が良いらしい。
+この本で色々勉強しつつ、CIFAR-10 にチャレンジするなり、もうちょっと違う何かに取り組むなりやってみようかなー。&lt;/p&gt;
 </description>
     </item>
     
