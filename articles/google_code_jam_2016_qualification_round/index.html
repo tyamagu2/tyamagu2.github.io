@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Google Code Jam 2016 Qualification Round | tyamagu2.xyz</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="author" content="Tomoki Yamaguchi">
+  <meta property="og:site_name" content="tyamagu2.xyz">
+  <meta property="og:url" content="http://tyamagu2.xyz/articles/google_code_jam_2016_qualification_round/">
+  
+    <meta property="og:type" content="article" />
+    <meta property="og:article:author" content="Tomoki Yamaguchi" />
+    <meta property="og:title" content="Google Code Jam 2016 Qualification Round">
+    <meta property="og:article:published_time" content="2016-04-10T21:46:37&#43;09:00" />
+  
+  <link rel="canonical" href="http://tyamagu2.xyz/articles/google_code_jam_2016_qualification_round/" />
+  <link href="" rel="alternate" type="application/rss+xml" title="tyamagu2.xyz" />
+  <link href="" rel="feed" type="application/rss+xml" title="tyamagu2.xyz" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+</head>
+
+  <body>
+    <header id="site-header">
+  <div class="container">
+    <h1 class="site-title">
+      <a href="http://tyamagu2.xyz" alt="tyamagu2.xyz">tyamagu2.xyz</a>
+    </h1>
+    <p class="pull-right header-links">
+      <a href="" type="application/rss+xml" target="_blank"><i class="fa fa-rss"></i></a>
+      <a href="https://github.com/tyamagu2"><i class="fa fa-github"></i></a>
+      <a href="https://twitter.com/tyamagu2"><i class="fa fa-twitter"></i></a>
+    </p>
+  </div>
+</header>
+
+    <main class="container">
+      <article>
+        <header class="article-header">
+          <h2><a href="http://tyamagu2.xyz/articles/google_code_jam_2016_qualification_round/">Google Code Jam 2016 Qualification Round</a></h2>
+          <p class="article-pubtime">April 10, 2016</p>
+        </header>
+        <div class="article-body">
+          
+
+<p><a href="https://code.google.com/codejam/">Google Code Jam 2016</a> の Qualification Round をやった。
+A と B しか解いてないけど、どちらも Large も解けたので Round 1 には進出できた。
+C と D はできなかったんだけど、夜にお酒が入ってたのがだめなんだ！って自分に言い訳した。
+でも朝起きてフレッシュな気持ちでやってみたら、D の Large 以外はできた。D の Large はわからん。</p>
+
+<p>ちなみに全部 ruby で回答した。本当は C++ でやろうと思ってたんだけど、
+疲れていので慣れてる ruby で楽することにした。</p>
+
+<h3 id="problem-a-counting-sheep:a4d47ca2ceb0ea4e1c107812a5c788b5">Problem A. Counting Sheep</h3>
+
+<ul>
+<li>整数 N が与えられる。</li>
+<li>N, 2 * N, 3 * N, &hellip; とカウントしていって、各桁に 0 〜 9 が最低一回出現した時の数字を答えよ。</li>
+<li>永遠にカウントする（0 ~ 9 のうち出てこない数字がある）場合は INSOMNIA と答えよ。</li>
+<li>Small は 0 ≤ N ≤ 200。Large は 0 ≤ N ≤ 106。</li>
+</ul>
+
+<p>INSOMNIA なパターンは N = 0 の場合だけのはず。
+難しく考えずに N から順番に数字を見ていき、0 ~ 9 が全部出たときの数字を答えたら通った。</p>
+
+<pre><code>case_count = gets.to_i
+case_count.times do |t|
+  n = gets.to_i
+
+  if n == 0
+    puts &quot;Case ##{t+1}: INSOMNIA&quot;
+    next
+  end
+
+  s = Set.new
+  x = 0
+  while s.size &lt; 10
+    x += n
+    x.to_s.each_char { |c| s &lt;&lt; c }
+  end
+
+  puts &quot;Case ##{t+1}: #{x}&quot;
+end
+</code></pre>
+
+<h3 id="problem-b-revenge-of-the-pancakes:a4d47ca2ceb0ea4e1c107812a5c788b5">Problem B. Revenge of the Pancakes</h3>
+
+<ul>
+<li>パンケーキのスタックがある。</li>
+<li>パンケーキは表か裏を向いている。</li>
+<li>スタックの一番上から任意の枚数の連続したパンケーキを反転させることができる。</li>
+<li>すべてのパンケーキを表にするための最小の反転回数を答えよ。</li>
+<li>Small は 1 ≤ パンケーキの枚数 ≤ 10。Large は 1 ≤ パンケーキの枚数 ≤ 100。</li>
+</ul>
+
+<p>幅優先探索とかダイクストラ法だと Large がダメなので、A* でやってみることにした。</p>
+
+<p>連続した裏のパンケーキは一度で反転できるので、
+裏のパンケーキが連続した部分がいくつあるかをその状態のコストにすれば良さそう。
+例えば <code>++--++--</code>（左がスタックの一番上、+ は表、- は裏）のコストは 2、みたいな。
+ただ、それだとこの例を全部反転させた <code>--++--++</code> のコストも 2 としてしまうのはおかしい。
+より単純なケースで考えると、<code>--++</code> のように先頭から連続する裏のパンケーキは、反転 1 回ですべて表にできる。
+一方 <code>++--</code> は 2 回反転が必要。ということで、先頭から裏のパンケーキが連続している場合はコストを 1 足す。
+それ以降の裏のパンケーキが連続する部分についてはコストを 2 足す、ということにした。
+例えば <code>--++--++---++</code> ならコストは 5 になる。んで、Large は 10 秒ぐらいかかったけど、チェック通った。</p>
+
+<p>ただ、朝起きてよくよく考えてみたら、上記のコストってそのまま必要な最小回数な気がしてきた。
+先頭から連続する裏のパンケーキは 1 回反転させれば全部表にできる。
+また、先頭からは表が連続しており、次に裏が連続していた場合、全体を反転するのに 1 回、
+その後先頭から連続する裏面を反転するのにプラス 1 回で 2 回。
+もし連続する裏の部分が複数ある場合、例えば <code>++--++--++</code> の場合、
+一番下にある裏向きのパンケーキまで全部反転し（<code>--++--++++</code>）、
+更に再度一番下にある裏向きのパンケーキまで全部反転すれば（<code>++--++++++</code>）、
+2 回の反転で連続する裏の部分が 1 箇所減った。感覚的にはこれが最小の手数っぽく思える。
+実際この方法で出した答えで練習モードのチェックに通った。結果コードもすっきり。</p>
+
+<pre><code>case_count = gets.to_i
+
+def distance(stack)
+  d = 0
+  prev = true
+
+  stack.each do |x|
+    d += 2 if !x &amp;&amp; prev
+    prev = x
+  end
+
+  d -= 1 unless stack[0]
+  d
+end
+
+case_count.times do |t|
+  stack = gets.chomp.each_char.map { |c| c == '+' }
+
+  puts &quot;Case ##{t+1}: #{distance(stack)}&quot;
+end
+</code></pre>
+
+<h3 id="problem-c-coin-jam:a4d47ca2ceb0ea4e1c107812a5c788b5">Problem C. Coin Jam</h3>
+
+<ul>
+<li>jamicoin という、N 個の数字からなる文字列がある。
+
+<ul>
+<li>すべての位は 0 か 1。</li>
+<li>最大と最小の位は必ず 1。</li>
+<li>文字列を 2 〜 10 進数として評価した値はいずれも素数でない。</li>
+</ul></li>
+<li>J 個の jamicoin と、それらを 2 〜 10 進数として評価したときの non-trivial な（1 とそれ自身でない）約数を答えよ。</li>
+<li>テストケースは Small/Large ともに 1 個だけで、Small は N = 16、J = 50。Large は N = 32、N = 500。</li>
+<li>最低 J 個は jamicoin が存在することは保証されている。</li>
+</ul>
+
+<p>最初は、事前に <code>100...001 (base 2)</code> から <code>111...111 (base 10)</code> までの全部の数値の約数を一個ずつ見つけておくことでどうにかする方向で考えてみた。
+事前に約数を見つけておけば、<code>100...001</code> から <code>111...111</code> までを順番に試していって、
+それぞれ 2 〜 10 進数で評価して、約数があるかどうか見ていけば良さそう、とう考え。
+ただ、流石にこれじゃあ計算量多すぎて無理だなーと思いつつ、一応やってみた。案の定ダメだった。</p>
+
+<p>ということで翌朝アプローチを変えてみることにした。
+<code>100...001</code> から <code>111...111</code> までを順番に見ていき、
+2 〜 10 進数として評価した値が素数かどうかを判定する。
+素数じゃなかったら約数を見つける。
+事前に約数を見つけたりはしない。</p>
+
+<p>とはいえ、素数かどうかの判定方法なんて、エラトステネスの篩か素因数分解するかしか知らないけど、どちらも時間かかりすぎて無理。
+しょうがないので、高速に素数か判定する方法をググった結果、Stackoveflow の導きにより Miller-Rabin primality test という方式に行き着いた。
+あんまり理論は理解してないけど、とりあえずこれで素数の高速判定は問題なし。</p>
+
+<p>次に、素数じゃないとわかったら約数を見つけないといけない。
+でも、約数の候補を全部試していくのは時間的に無理そう。
+よくよく問題を見ると、対象範囲のすべての jamicoin ではなく J 個の jamicoion を見つけろと言っている。
+じゃあたぶん、ある程度まで約数見つける努力をして、それでも見つからなかったら打ち切れば良さそう。
+ということで、x までの素数をリストアップしておき、その範囲内でだけ約数を探すようにした。
+この問題に関しては、事前にテストケースの内容がわかっているので、
+適当にいくつかの値を試して x を探すことにしたんだけど、x = 1000 で十分だった。</p>
+
+<pre><code>def prime?(n)
+  # Miller-Rabin primality test の実装
+end
+
+primes = 3.step(1000, 2).with_object([2]) { |n, a| a &lt;&lt; n if prime?(n) }
+
+case_count.times do |t|
+  n, j = gets.split(' ').map(&amp;:to_i)
+
+  x = '0' * (n - 2)
+
+  answers = []
+  while answers.size &lt; j do
+    coin = &quot;1#{x}1&quot;
+    divisors = []
+
+    2.upto(10) do |base|
+      v = coin.to_i(base)
+
+      break if prime?(v)
+
+      divisor = primes.find { |prime| v % prime == 0 }
+      break unless divisor
+      divisors &lt;&lt; divisor
+    end
+
+    answers &lt;&lt; [coin, divisors] if divisors.length == 9
+
+    next_x = (x.to_i(2) + 1).to_s(2)
+    x = &quot;#{'0' * (n - 2 - next_x.length)}#{next_x}&quot;
+  end
+
+  puts &quot;Case ##{t+1}:&quot;
+  answers.each do |coin, divs|
+    puts &quot;#{coin} #{divs.map(&amp;:to_s).join(' ')}&quot;
+  end
+end
+</code></pre>
+
+<h3 id="problem-d-fractiles:a4d47ca2ceb0ea4e1c107812a5c788b5">Problem D. Fractiles</h3>
+
+<ul>
+<li>K 枚のタイルに対して、以下の処理を C 回繰り返した K ^ C 枚のタイルがある。
+
+<ul>
+<li>タイルが L なら、オリジナルのタイル K 枚に置き換える。</li>
+<li>タイルが G なら、K 枚の G で置き換える。</li>
+<li>例: <code>LGL</code> -&gt; <code>LGLGGGLGL</code> -&gt; <code>LGLGGGLGLGGGGGGGGGLGLGGGLGL</code></li>
+</ul></li>
+<li>K ^ C 枚のタイルは汚れていて L か G か分からないが、S 枚だけタイルを綺麗にして L か G か判別できる。</li>
+<li>オリジナルの K 枚のタイルに G が含まれているかを、K ^ C 枚のタイルのうち S 枚以下だけ綺麗にして判定可能か、可能な場合はどれを綺麗にすれば良いか答えよ。</li>
+<li>Small/Large ともに 1 ≤ K ≤ 100、1 ≤ C ≤ 100、KC ≤ 10 ^ 18。</li>
+<li>Small は S = K、Large は 1 ≤ S ≤ K。</li>
+</ul>
+
+<p>これは全然わからなかった。んだけれども、一晩寝て、Small は S = K なんだから、オリジナルの内容全部確認できるんじゃね？と思いついた。
+オリジナルの一番左が L なら、左から K 枚はオリジナルの内容になる。つまり左から K 枚みればオリジナルに G が合ったか判定可能。
+一方、オリジナルの一番左が G なら、左から K 枚は全部 G になるので、もちろん判定可能。
+つまり左から K 枚見るだけで判定可能。</p>
+
+<pre><code>case_count = gets.to_i
+case_count.times do |t|
+  k, c, s = gets.split(' ').map(&amp;:to_i)
+
+  puts &quot;Case ##{t+1}: #{(1..k).to_a.join(' ')}&quot;
+end
+</code></pre>
+
+<p>Large はわからん。</p>
+
+<hr />
+
+<p>毎年 Qualification はやるんだけど、Round 1 は参加しないで終わってしまうので、今年は予定合わせて参加する。
+以前一度だけ Round 1 にも参加した時は、Round 1 は通過したけど Round 2 でダメだった。今年は Round 2 もなんとか通過したいなー。
+とりあえずは Analysis 読んで勉強せねば。</p>
+
+        </div>
+        <div class="social">
+  <a class="twitter-share-button" href="https://twitter.com/intent/tweet" data-via="tyamagu2">Tweet</a>
+</div>
+
+      </article>
+    </main>
+    <footer id="site-footer">
+  <div class="container">
+    <hr>
+  </div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-71787010-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+<script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+  t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+  t._e.push(f);
+  };
+
+  return t;
+  }(document, "script", "twitter-wjs"));
+</script>
+
+  </body>
+</html>

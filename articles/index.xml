@@ -6,8 +6,225 @@
     <description>Recent content in Articles on tyamagu2.xyz</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Sun, 27 Mar 2016 10:46:59 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 10 Apr 2016 21:46:37 +0900</lastBuildDate>
     <atom:link href="http://tyamagu2.xyz/articles/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Google Code Jam 2016 Qualification Round</title>
+      <link>http://tyamagu2.xyz/articles/google_code_jam_2016_qualification_round/</link>
+      <pubDate>Sun, 10 Apr 2016 21:46:37 +0900</pubDate>
+      
+      <guid>http://tyamagu2.xyz/articles/google_code_jam_2016_qualification_round/</guid>
+      <description>
+
+&lt;p&gt;&lt;a href=&#34;https://code.google.com/codejam/&#34;&gt;Google Code Jam 2016&lt;/a&gt; の Qualification Round をやった。
+A と B しか解いてないけど、どちらも Large も解けたので Round 1 には進出できた。
+C と D はできなかったんだけど、夜にお酒が入ってたのがだめなんだ！って自分に言い訳した。
+でも朝起きてフレッシュな気持ちでやってみたら、D の Large 以外はできた。D の Large はわからん。&lt;/p&gt;
+
+&lt;p&gt;ちなみに全部 ruby で回答した。本当は C++ でやろうと思ってたんだけど、
+疲れていので慣れてる ruby で楽することにした。&lt;/p&gt;
+
+&lt;h3 id=&#34;problem-a-counting-sheep:a4d47ca2ceb0ea4e1c107812a5c788b5&#34;&gt;Problem A. Counting Sheep&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;整数 N が与えられる。&lt;/li&gt;
+&lt;li&gt;N, 2 * N, 3 * N, &amp;hellip; とカウントしていって、各桁に 0 〜 9 が最低一回出現した時の数字を答えよ。&lt;/li&gt;
+&lt;li&gt;永遠にカウントする（0 ~ 9 のうち出てこない数字がある）場合は INSOMNIA と答えよ。&lt;/li&gt;
+&lt;li&gt;Small は 0 ≤ N ≤ 200。Large は 0 ≤ N ≤ 106。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;INSOMNIA なパターンは N = 0 の場合だけのはず。
+難しく考えずに N から順番に数字を見ていき、0 ~ 9 が全部出たときの数字を答えたら通った。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;case_count = gets.to_i
+case_count.times do |t|
+  n = gets.to_i
+
+  if n == 0
+    puts &amp;quot;Case ##{t+1}: INSOMNIA&amp;quot;
+    next
+  end
+
+  s = Set.new
+  x = 0
+  while s.size &amp;lt; 10
+    x += n
+    x.to_s.each_char { |c| s &amp;lt;&amp;lt; c }
+  end
+
+  puts &amp;quot;Case ##{t+1}: #{x}&amp;quot;
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;problem-b-revenge-of-the-pancakes:a4d47ca2ceb0ea4e1c107812a5c788b5&#34;&gt;Problem B. Revenge of the Pancakes&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;パンケーキのスタックがある。&lt;/li&gt;
+&lt;li&gt;パンケーキは表か裏を向いている。&lt;/li&gt;
+&lt;li&gt;スタックの一番上から任意の枚数の連続したパンケーキを反転させることができる。&lt;/li&gt;
+&lt;li&gt;すべてのパンケーキを表にするための最小の反転回数を答えよ。&lt;/li&gt;
+&lt;li&gt;Small は 1 ≤ パンケーキの枚数 ≤ 10。Large は 1 ≤ パンケーキの枚数 ≤ 100。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;幅優先探索とかダイクストラ法だと Large がダメなので、A* でやってみることにした。&lt;/p&gt;
+
+&lt;p&gt;連続した裏のパンケーキは一度で反転できるので、
+裏のパンケーキが連続した部分がいくつあるかをその状態のコストにすれば良さそう。
+例えば &lt;code&gt;++--++--&lt;/code&gt;（左がスタックの一番上、+ は表、- は裏）のコストは 2、みたいな。
+ただ、それだとこの例を全部反転させた &lt;code&gt;--++--++&lt;/code&gt; のコストも 2 としてしまうのはおかしい。
+より単純なケースで考えると、&lt;code&gt;--++&lt;/code&gt; のように先頭から連続する裏のパンケーキは、反転 1 回ですべて表にできる。
+一方 &lt;code&gt;++--&lt;/code&gt; は 2 回反転が必要。ということで、先頭から裏のパンケーキが連続している場合はコストを 1 足す。
+それ以降の裏のパンケーキが連続する部分についてはコストを 2 足す、ということにした。
+例えば &lt;code&gt;--++--++---++&lt;/code&gt; ならコストは 5 になる。んで、Large は 10 秒ぐらいかかったけど、チェック通った。&lt;/p&gt;
+
+&lt;p&gt;ただ、朝起きてよくよく考えてみたら、上記のコストってそのまま必要な最小回数な気がしてきた。
+先頭から連続する裏のパンケーキは 1 回反転させれば全部表にできる。
+また、先頭からは表が連続しており、次に裏が連続していた場合、全体を反転するのに 1 回、
+その後先頭から連続する裏面を反転するのにプラス 1 回で 2 回。
+もし連続する裏の部分が複数ある場合、例えば &lt;code&gt;++--++--++&lt;/code&gt; の場合、
+一番下にある裏向きのパンケーキまで全部反転し（&lt;code&gt;--++--++++&lt;/code&gt;）、
+更に再度一番下にある裏向きのパンケーキまで全部反転すれば（&lt;code&gt;++--++++++&lt;/code&gt;）、
+2 回の反転で連続する裏の部分が 1 箇所減った。感覚的にはこれが最小の手数っぽく思える。
+実際この方法で出した答えで練習モードのチェックに通った。結果コードもすっきり。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;case_count = gets.to_i
+
+def distance(stack)
+  d = 0
+  prev = true
+
+  stack.each do |x|
+    d += 2 if !x &amp;amp;&amp;amp; prev
+    prev = x
+  end
+
+  d -= 1 unless stack[0]
+  d
+end
+
+case_count.times do |t|
+  stack = gets.chomp.each_char.map { |c| c == &#39;+&#39; }
+
+  puts &amp;quot;Case ##{t+1}: #{distance(stack)}&amp;quot;
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;problem-c-coin-jam:a4d47ca2ceb0ea4e1c107812a5c788b5&#34;&gt;Problem C. Coin Jam&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;jamicoin という、N 個の数字からなる文字列がある。
+
+&lt;ul&gt;
+&lt;li&gt;すべての位は 0 か 1。&lt;/li&gt;
+&lt;li&gt;最大と最小の位は必ず 1。&lt;/li&gt;
+&lt;li&gt;文字列を 2 〜 10 進数として評価した値はいずれも素数でない。&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;J 個の jamicoin と、それらを 2 〜 10 進数として評価したときの non-trivial な（1 とそれ自身でない）約数を答えよ。&lt;/li&gt;
+&lt;li&gt;テストケースは Small/Large ともに 1 個だけで、Small は N = 16、J = 50。Large は N = 32、N = 500。&lt;/li&gt;
+&lt;li&gt;最低 J 個は jamicoin が存在することは保証されている。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;最初は、事前に &lt;code&gt;100...001 (base 2)&lt;/code&gt; から &lt;code&gt;111...111 (base 10)&lt;/code&gt; までの全部の数値の約数を一個ずつ見つけておくことでどうにかする方向で考えてみた。
+事前に約数を見つけておけば、&lt;code&gt;100...001&lt;/code&gt; から &lt;code&gt;111...111&lt;/code&gt; までを順番に試していって、
+それぞれ 2 〜 10 進数で評価して、約数があるかどうか見ていけば良さそう、とう考え。
+ただ、流石にこれじゃあ計算量多すぎて無理だなーと思いつつ、一応やってみた。案の定ダメだった。&lt;/p&gt;
+
+&lt;p&gt;ということで翌朝アプローチを変えてみることにした。
+&lt;code&gt;100...001&lt;/code&gt; から &lt;code&gt;111...111&lt;/code&gt; までを順番に見ていき、
+2 〜 10 進数として評価した値が素数かどうかを判定する。
+素数じゃなかったら約数を見つける。
+事前に約数を見つけたりはしない。&lt;/p&gt;
+
+&lt;p&gt;とはいえ、素数かどうかの判定方法なんて、エラトステネスの篩か素因数分解するかしか知らないけど、どちらも時間かかりすぎて無理。
+しょうがないので、高速に素数か判定する方法をググった結果、Stackoveflow の導きにより Miller-Rabin primality test という方式に行き着いた。
+あんまり理論は理解してないけど、とりあえずこれで素数の高速判定は問題なし。&lt;/p&gt;
+
+&lt;p&gt;次に、素数じゃないとわかったら約数を見つけないといけない。
+でも、約数の候補を全部試していくのは時間的に無理そう。
+よくよく問題を見ると、対象範囲のすべての jamicoin ではなく J 個の jamicoion を見つけろと言っている。
+じゃあたぶん、ある程度まで約数見つける努力をして、それでも見つからなかったら打ち切れば良さそう。
+ということで、x までの素数をリストアップしておき、その範囲内でだけ約数を探すようにした。
+この問題に関しては、事前にテストケースの内容がわかっているので、
+適当にいくつかの値を試して x を探すことにしたんだけど、x = 1000 で十分だった。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;def prime?(n)
+  # Miller-Rabin primality test の実装
+end
+
+primes = 3.step(1000, 2).with_object([2]) { |n, a| a &amp;lt;&amp;lt; n if prime?(n) }
+
+case_count.times do |t|
+  n, j = gets.split(&#39; &#39;).map(&amp;amp;:to_i)
+
+  x = &#39;0&#39; * (n - 2)
+
+  answers = []
+  while answers.size &amp;lt; j do
+    coin = &amp;quot;1#{x}1&amp;quot;
+    divisors = []
+
+    2.upto(10) do |base|
+      v = coin.to_i(base)
+
+      break if prime?(v)
+
+      divisor = primes.find { |prime| v % prime == 0 }
+      break unless divisor
+      divisors &amp;lt;&amp;lt; divisor
+    end
+
+    answers &amp;lt;&amp;lt; [coin, divisors] if divisors.length == 9
+
+    next_x = (x.to_i(2) + 1).to_s(2)
+    x = &amp;quot;#{&#39;0&#39; * (n - 2 - next_x.length)}#{next_x}&amp;quot;
+  end
+
+  puts &amp;quot;Case ##{t+1}:&amp;quot;
+  answers.each do |coin, divs|
+    puts &amp;quot;#{coin} #{divs.map(&amp;amp;:to_s).join(&#39; &#39;)}&amp;quot;
+  end
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;problem-d-fractiles:a4d47ca2ceb0ea4e1c107812a5c788b5&#34;&gt;Problem D. Fractiles&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;K 枚のタイルに対して、以下の処理を C 回繰り返した K ^ C 枚のタイルがある。
+
+&lt;ul&gt;
+&lt;li&gt;タイルが L なら、オリジナルのタイル K 枚に置き換える。&lt;/li&gt;
+&lt;li&gt;タイルが G なら、K 枚の G で置き換える。&lt;/li&gt;
+&lt;li&gt;例: &lt;code&gt;LGL&lt;/code&gt; -&amp;gt; &lt;code&gt;LGLGGGLGL&lt;/code&gt; -&amp;gt; &lt;code&gt;LGLGGGLGLGGGGGGGGGLGLGGGLGL&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;K ^ C 枚のタイルは汚れていて L か G か分からないが、S 枚だけタイルを綺麗にして L か G か判別できる。&lt;/li&gt;
+&lt;li&gt;オリジナルの K 枚のタイルに G が含まれているかを、K ^ C 枚のタイルのうち S 枚以下だけ綺麗にして判定可能か、可能な場合はどれを綺麗にすれば良いか答えよ。&lt;/li&gt;
+&lt;li&gt;Small/Large ともに 1 ≤ K ≤ 100、1 ≤ C ≤ 100、KC ≤ 10 ^ 18。&lt;/li&gt;
+&lt;li&gt;Small は S = K、Large は 1 ≤ S ≤ K。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;これは全然わからなかった。んだけれども、一晩寝て、Small は S = K なんだから、オリジナルの内容全部確認できるんじゃね？と思いついた。
+オリジナルの一番左が L なら、左から K 枚はオリジナルの内容になる。つまり左から K 枚みればオリジナルに G が合ったか判定可能。
+一方、オリジナルの一番左が G なら、左から K 枚は全部 G になるので、もちろん判定可能。
+つまり左から K 枚見るだけで判定可能。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;case_count = gets.to_i
+case_count.times do |t|
+  k, c, s = gets.split(&#39; &#39;).map(&amp;amp;:to_i)
+
+  puts &amp;quot;Case ##{t+1}: #{(1..k).to_a.join(&#39; &#39;)}&amp;quot;
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Large はわからん。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;毎年 Qualification はやるんだけど、Round 1 は参加しないで終わってしまうので、今年は予定合わせて参加する。
+以前一度だけ Round 1 にも参加した時は、Round 1 は通過したけど Round 2 でダメだった。今年は Round 2 もなんとか通過したいなー。
+とりあえずは Analysis 読んで勉強せねば。&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>numpy で Neural Network</title>
