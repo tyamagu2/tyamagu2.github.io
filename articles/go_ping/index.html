@@ -55,7 +55,7 @@
 
 <p>以下、作成の記録。</p>
 
-<h3 id="ping-の仕組み:d7d264d2e335417a34bb27e8ee811218">ping の仕組み</h3>
+<h3 id="ping-の仕組み">ping の仕組み</h3>
 
 <p>まずは ping の仕組みを調べるところから。おもむろに手元の MBP で <code>man ping</code> してマニュアルを開く。
 以下 BSD System Manager&rsquo;s Manual PING(8) より抜粋。</p>
@@ -80,7 +80,7 @@ ICMP の詳細は後述するが、ECHO_REQUEST を送ったら ECHO_REPLY が�
 データにタイムスタンプが含まれていることは RTT の計算に必須ではないのだけど、
 こうしておけばステートレスにできて楽、ということだと思われる。</p>
 
-<h3 id="icmp:d7d264d2e335417a34bb27e8ee811218">ICMP</h3>
+<h3 id="icmp">ICMP</h3>
 
 <p>ICMP は Internet Control Mesage Protocol のこと。<a href="https://tools.ietf.org/html/rfc792">RFC 792</a> で定義されている。
 ホスト間のやり取り、例えばデータグラムの処理に関するエラーの報告などの用途に使うものとのこと。
@@ -95,7 +95,7 @@ ping で使うのはこのうちの <code>Echo Message</code> および <code>Ec
 IP パケットのヘッダーにどのような値をセットすべきかについても RFC に記載がある。
 特にポイントになるのは、Protocol フィールドに ICMP を表す 1 を指定することぐらい。</p>
 
-<h3 id="echo-echo-reply-message-のフォーマット:d7d264d2e335417a34bb27e8ee811218">Echo &amp; Echo Reply Message のフォーマット</h3>
+<h3 id="echo-echo-reply-message-のフォーマット">Echo &amp; Echo Reply Message のフォーマット</h3>
 
 <p>こうなっている。</p>
 
@@ -120,7 +120,7 @@ Checksum は Type から始まる ICMP Message 全体の Internet Checksum。計
 やはり Echo と Reply の対応がわからなくなる。そこで、Echo ごとに Sequence Number をインクリメントしておく。
 というような使い方が一般的な模様。</p>
 
-<h3 id="tcpdump-で-echo-echo-reply-message-を見る:d7d264d2e335417a34bb27e8ee811218">tcpdump で Echo &amp; Echo Reply Message を見る</h3>
+<h3 id="tcpdump-で-echo-echo-reply-message-を見る">tcpdump で Echo &amp; Echo Reply Message を見る</h3>
 
 <p>実際に見てみる。以下は上から順番に、1 つ目の Echo Message、1 つ目の Echo Reply Message、2 つ目の Echo Message、2 つ目の Echo Reply Message。</p>
 
@@ -178,7 +178,7 @@ Checksum は Type から始まる ICMP Message 全体の Internet Checksum。計
 <p>8 オクテット目以降の Data は Echo/Reply で一致している事がわかる。
 9 オクテット目からの 8 オクテットはタイムスタンプ担っていて、それ以降はどうやら単にインクリメントしたダミーデータらしい。</p>
 
-<h3 id="raw-socket:d7d264d2e335417a34bb27e8ee811218">Raw Socket</h3>
+<h3 id="raw-socket">Raw Socket</h3>
 
 <p>ping を作るには、ICMP の Echo Message を送れば良いことは分かった。次はどうやってアプリケーションから ICMP、というか IP パケットを送ればよいのかが疑問となる。</p>
 
@@ -200,7 +200,7 @@ ping の場合は ICMP のパケットを自分で Raw Socket を介して送受
 <p><a href="http://www.freebsd.org/cgi/man.cgi?query=icmp&amp;apropos=0&amp;sektion=0&amp;manpath=Darwin+8.0.1%2Fppc&amp;format=html">http://www.freebsd.org/cgi/man.cgi?query=icmp&amp;apropos=0&amp;sektion=0&amp;manpath=Darwin+8.0.1%2Fppc&amp;format=html</a>
 <a href="https://github.com/golang/net/blob/master/icmp/listen_posix.go#L25-L28">https://github.com/golang/net/blob/master/icmp/listen_posix.go#L25-L28</a></p>
 
-<h3 id="go-で実装:d7d264d2e335417a34bb27e8ee811218">Go で実装</h3>
+<h3 id="go-で実装">Go で実装</h3>
 
 <p>いよいよ Go で実装する。</p>
 

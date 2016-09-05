@@ -67,7 +67,7 @@
 <li><a href="https://nnhw.herokuapp.com/">https://nnhw.herokuapp.com/</a></li>
 </ul>
 
-<h3 id="neural-network-で学習:2e46c32abf32e1beef0fa0df88b28661">Neural Network で学習</h3>
+<h3 id="neural-network-で学習">Neural Network で学習</h3>
 
 <p>題材はコースと同じく手書きの数字認識。学習データには定番の <a href="http://yann.lecun.com/exdb/mnist/">MNIST のデータセット</a>を使った。</p>
 
@@ -85,7 +85,7 @@ batch gradient descent の時もコスト関数は収束しているようだっ
 ちなみに、数字ごとの各ピクセルの平均値を出して、ピクセルごとの差分を使って最小二乗法で分類、
 というシンプルなやり方だと 82% ぐらい。なのでそれよりはマシな結果になった。</p>
 
-<h3 id="手書き文字を-canvas-で入力:2e46c32abf32e1beef0fa0df88b28661">手書き文字を Canvas で入力</h3>
+<h3 id="手書き文字を-canvas-で入力">手書き文字を Canvas で入力</h3>
 
 <p>やっぱりインタラクティブじゃないとねー、ということで、Canvas に書いた文字を認識させるようにした。
 Canvas の内容を 28 x 28 にダウンサイズして Neural Network に渡している。
@@ -99,7 +99,7 @@ Web アプリのフレームワークには flask を使ってみた。
 
 <p>実際には上の gif のようにバッチリ分類はしてくれない。それでも、ピクセルごとの差分の最小二乗法よりはマシな精度になったけど。</p>
 
-<h3 id="heroku-にデプロイ:2e46c32abf32e1beef0fa0df88b28661">Heroku にデプロイ</h3>
+<h3 id="heroku-にデプロイ">Heroku にデプロイ</h3>
 
 <p>せっかくなので Heroku にデプロイすることにしたけど、ここで予定外と時間を使ってしまった。</p>
 
@@ -124,7 +124,7 @@ heroku には scipy をインストール出来ないと言われてしまった
 mkl optimized な numpy/scipy を、optimize されてない nomkl version の numpy/scipy にしたらサイズが小さくなるので大丈夫とのこと。
 というわけで nomkl 版にしてデプロイ成功。</p>
 
-<h3 id="感想:2e46c32abf32e1beef0fa0df88b28661">感想</h3>
+<h3 id="感想">感想</h3>
 
 <p>やっぱり実データだと全然精度が出ない。どこかにしょーもないバグがあるかもしれないけど、まあこんなもんなんだろうなと思う。</p>
 

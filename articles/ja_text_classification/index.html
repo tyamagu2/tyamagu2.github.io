@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>MeCab と scikit-learn で日本語テキストを分類する | tyamagu2.xyz</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="author" content="Tomoki Yamaguchi">
+  <meta property="og:site_name" content="tyamagu2.xyz">
+  <meta property="og:url" content="http://tyamagu2.xyz/articles/ja_text_classification/">
+  
+    <meta property="og:type" content="article" />
+    <meta property="og:article:author" content="Tomoki Yamaguchi" />
+    <meta property="og:title" content="MeCab と scikit-learn で日本語テキストを分類する">
+    <meta property="og:article:published_time" content="2016-09-05T22:44:24&#43;09:00" />
+  
+  <link rel="canonical" href="http://tyamagu2.xyz/articles/ja_text_classification/" />
+  <link href="" rel="alternate" type="application/rss+xml" title="tyamagu2.xyz" />
+  <link href="" rel="feed" type="application/rss+xml" title="tyamagu2.xyz" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+</head>
+
+  <body>
+    <header id="site-header">
+  <div class="container">
+    <h1 class="site-title">
+      <a href="http://tyamagu2.xyz" alt="tyamagu2.xyz">tyamagu2.xyz</a>
+    </h1>
+    <p class="pull-right header-links">
+      <a href="" type="application/rss+xml" target="_blank"><i class="fa fa-rss"></i></a>
+      <a href="https://github.com/tyamagu2"><i class="fa fa-github"></i></a>
+      <a href="https://twitter.com/tyamagu2"><i class="fa fa-twitter"></i></a>
+    </p>
+  </div>
+</header>
+
+    <main class="container">
+      <article>
+        <header class="article-header">
+          <h2><a href="http://tyamagu2.xyz/articles/ja_text_classification/">MeCab と scikit-learn で日本語テキストを分類する</a></h2>
+          <p class="article-pubtime">September 5, 2016</p>
+        </header>
+        <div class="article-body">
+          
+
+<p>scikit-learn を使って日本語テキストの分類をやった時に色々調べたメモ。</p>
+
+<p>基本的なテキスト分類のやり方は、<a href="http://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html">scikit-learn のチュートリアル</a>を参考にした。
+簡単に説明すると、以下のようなやり方。</p>
+
+<ol>
+<li><code>CountVectorizer</code> でテキスト内の単語の出現回数をカウントして</li>
+<li><code>TfidfTransformer</code> で単語の出現回数から tf-idf を計算して</li>
+<li>適当な分類器（<code>MultinomialNB</code>、<code>SGDClassifier</code> など）に投げて分類する</li>
+</ol>
+
+<p>ただ、上記のチュートリアルそのままだと2点ほど問題があった。</p>
+
+<ol>
+<li><code>CountVectorizer</code> がテキストを単語に分割してくれるが、日本語の（MeCab を使った）分割はどうすればよいのか？</li>
+<li>テキスト以外の特徴量も使うにはどうすればよいのか？</li>
+</ol>
+
+<h3 id="日本語の-mecab-を使った-分割はどうすればよいのか">日本語の（MeCab を使った）分割はどうすればよいのか？</h3>
+
+<p><code>CountVectorizer</code> はテキストを与えたら勝手に単語に分割して出現回数を数えてくれる。
+しかし、これは英語のようにスペースで単語が分割可能な言語の話であって、日本語ではそうはいかない。</p>
+
+<p>そこで <code>CountVectorizer</code> の<a href="http://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">ドキュメント</a>を調べたところ、
+コンストラクタの <code>analyzer</code> 引数にメソッドを渡せば良いことが分かった。</p>
+
+<blockquote>
+<p>analyzer: string, {&lsquo;word&rsquo;, &lsquo;char&rsquo;, &lsquo;char_wb&rsquo;} or callable</p>
+
+<p>Whether the feature should be made of word or character n-grams. Option ‘char_wb’ creates character n-grams only from text inside word boundaries.</p>
+
+<p>If a callable is passed it is used to extract the sequence of features out of the raw, unprocessed input.
+&hellip;</p>
+</blockquote>
+
+<p>例えば以下の <code>WordDividor</code> のようなクラスを作って、<code>extract_words</code> インスタンスメソッドを <code>CountVector</code> のコンストラクタに <code>analyzer</code> 引数として渡す。</p>
+
+<pre><code>import MeCab
+from sklearn.feature_extraction.text import CountVectorizer
+
+class WordDividor:
+    INDEX_CATEGORY = 0
+    INDEX_ROOT_FORM = 6
+    TARGET_CATEGORIES = [&quot;名詞&quot;, &quot; 動詞&quot;,  &quot;形容詞&quot;, &quot;副詞&quot;, &quot;連体詞&quot;, &quot;感動詞&quot;]
+
+    def __init__(self, dictionary=&quot;mecabrc&quot;):
+        self.dictionary = dictionary
+        self.tagger = MeCab.Tagger(self.dictionary)
+
+    def extract_words(self, text):
+        if not text:
+            return []
+
+        words = []
+
+        node = self.tagger.parseToNode(text)
+        while node:
+            features = node.feature.split(',')
+
+            if features[self.INDEX_CATEGORY] in self.TARGET_CATEGORIES:
+                if features[self.INDEX_ROOT_FORM] == &quot;*&quot;:
+                    words.append(node.surface)
+                else:
+                    # prefer root form
+                    words.append(features[self.INDEX_ROOT_FORM])
+
+            node = node.next
+
+        return words
+
+if __name__ == '__main__':
+    data = [
+        '蛙の子は蛙',
+        '親の心子知らず'
+    ]
+
+    wd = WordDividor()
+    cv = CountVectorizer(analyzer=wd.extract_words)
+
+    counts = cv.fit_transform(data)
+    print(cv.vocabulary_)
+    print(counts)
+</code></pre>
+
+<p>これを実行すると、以下のようにちゃんと単語に分割してカウントされている。</p>
+
+<pre><code>{'蛙': 3, '知らず': 2, '子': 0, '心子': 1, '親': 4}
+  (0, 3)        2
+  (0, 0)        1
+  (1, 4)        1
+  (1, 1)        1
+  (1, 2)        1
+</code></pre>
+
+<p>ちなみにこの例では <code>mecab-python3</code> を使っている。<code>mecab-python3</code> の使い方は割愛。
+ポイントとして、特定の品詞の単語だけを使うようにしている。また、原形が提示されている場合は原形を使っている。</p>
+
+<p>あと、この例ではやってないけど、<a href="https://github.com/neologd/mecab-ipadic-neologd">mecab-ipadic-neologd</a> を使うようにしたり、
+<a href="https://github.com/neologd/mecab-ipadic-neologd/wiki/Regexp">この辺</a>を参考にテキストを事前に正規化したりすると良いと思う。</p>
+
+<p>一つ注意点として、この <code>CountVector</code> のインスタンスはそのままではシリアライズできない。
+いろいろ調べたところ、<code>WordDividor</code> のインスタンスメソッドを保持しているのが問題らしい。
+<code>pickle</code> だけじゃなくて、<code>dill</code> みたいなライブラリを使っても同様だった。</p>
+
+<p>なんでわざわざクラスを作っているかというと、MeCab の <code>Tagger</code> の初期化を一度だけにしたいから。
+トップレベルのメソッド内で毎回 <code>Tagger</code> を作るようにすれば上記の問題はなくなるけど、
+そうすると今度は <code>analyzer</code> の呼び出しのたびに <code>Tagger</code> の初期化が走ってとても時間がかかる。
+この辺、なんかうまい解決策があれば良いのだけど。</p>
+
+<p>いちおう対策として、<code>CountVector</code> のインスタンスをシリアライズする代わりに、<code>vocabulary_</code> アトリビュートをシリアライズして保存しておく方法がある。
+デシリアライズ時は <code>CountVector</code> のコンストラクタの <code>vocabulary</code> 引数にデシリアライズした <code>vocabulary_</code> を、
+<code>analyzer</code> 引数にはシリアライズ時と同じセットアップした <code>WordDividor</code> インスタンスの <code>extract_words</code> を渡すようにすれば、
+同じ状態の <code>CountVector</code> が作れる。</p>
+
+<h3 id="テキスト以外の特徴量も使うにはどうすればよいのか">テキスト以外の特徴量も使うにはどうすればよいのか？</h3>
+
+<p>例えば tweet にはテキスト以外にも投稿者、投稿日時、位置情報などの情報がある。こういったテキスト情報以外も特徴量として使いたいよねー、ってことで方法を探したところ、
+<a href="http://scikit-learn.org/stable/modules/generated/sklearn.pipeline.FeatureUnion.html">FeatureUnion</a> を使えば良いことが分かった。</p>
+
+<p><code>FeatureUnion</code> は、簡単に言うと <code>CountVectorizer</code> などの transformer の出力データをまとめるための機能。
+詳しい使い方は<a href="http://scikit-learn.org/stable/modules/generated/sklearn.pipeline.FeatureUnion.html#examples-using-sklearn-pipeline-featureunion">この辺の例</a>を見るのが良いと思う。</p>
+
+<p>具体的に、入力データが [text, float, float] というフォーマットの場合を考えてみる。text は <code>CountVectorizer</code> -&gt; <code>TfidfTransformer</code> を適用して tf-idf に変換したい、
+残りのデータはそのまま使いたい、とする。FeatureUnion を使えば、以下の様な事ができる。</p>
+
+<ol>
+<li>text のみを取り出す transformer と、それ以外を取り出す transformer を作る</li>
+<li>text を取り出す transformer の出力は、さらに <code>CountVectorizer</code> -&gt;  <code>TfidfTransformer</code> で処理して tf-idf に変換する</li>
+<li>text 以外を取り出す transformer の出力と、<code>TfidfTransformer</code> の出力を FeatureUnion でまとめる</li>
+<li>FeatureUnion の出力を SDGClassifier などに渡して学習・分類する</li>
+</ol>
+
+<p>これをコードにしたのが以下。</p>
+
+<pre><code>import MeCab
+import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.linear_model import SGDClassifier
+from sklearn.pipeline import FeatureUnion, Pipeline
+
+class WordDividor:
+    ...
+
+class TextExtractor(BaseEstimator, TransformerMixin):
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, rows):
+        return rows[:, 0]
+
+class OtherFeaturesExtractor(BaseEstimator, TransformerMixin):
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, rows):
+        return rows[:, 1:].astype('float')
+
+if __name__ == '__main__':
+    train_data = np.array([
+        ['蛙の子は蛙', 0.5, 0.5],
+        ['親の心子知らず', 0.2, 0.7]
+    ])
+
+    train_labels = [1, 2]
+
+    test_data = np.array([
+        ['鬼の居ぬ間に洗濯', 0.1, 0.8],
+        ['取らぬ狸の皮算用', 0.4, 0.3]
+    ])
+
+    wd = WordDividor()
+
+    clf1 = Pipeline([
+        ('count_vector', CountVectorizer(analyzer=wd.extract_words)),
+        ('tfidf', TfidfTransformer()),
+        ('classifier', SGDClassifier(loss='hinge', random_state=42))
+    ])
+
+    clf1.fit(train_data[:, 0], train_labels)
+    print(&quot;text only:&quot;)
+    print(clf1.predict(test_data[:, 0]))
+
+    clf2 = Pipeline([
+        ('features', FeatureUnion([
+            ('text', Pipeline([
+                ('content', TextExtractor()),
+                ('count_vector', CountVectorizer(analyzer=wd.extract_words)),
+                ('tfidf', TfidfTransformer())
+            ])),
+            ('other_features', OtherFeaturesExtractor()),
+        ])),
+        ('classifier', SGDClassifier(loss='hinge', random_state=42))
+    ])
+
+    clf2.fit(train_data, train_labels)
+    print(&quot;feature union:&quot;)
+    print(clf2.predict(test_data))
+</code></pre>
+
+<p><code>TextExractor</code> の <code>transform</code> メソッドでは、[text, float, float] というデータの先頭のカラム、つまりテキストだけ取り出して配列として返している。
+一方 <code>OtherFeaturesExtractor</code> の <code>transform</code> メソッドでは、先頭の text カラムを除外した配列を返している。
+<code>FeatureUnion</code> では <code>OtherFeatureExtractor</code> の出力と、<code>TexExtractor</code> の出力を <code>CountVectorizer</code>、<code>TfidfTransformer</code> と通したものを結合している。
+最後に <code>FeatureUnion</code> の出力が <code>SDGClassifier</code> に渡っている。</p>
+
+<p>上記を動かした結果はこんなかんじ。テキストだけの時と結果が変わっているので、テキスト以外のデータもちゃんと使われていると思われる。</p>
+
+<pre><code>text only:
+[1 1]
+feature union:
+[2 1]
+</code></pre>
+
+<p>なお、<code>Pipeline</code> は<a href="http://scikit-learn.org/stable/modules/model_persistence.html">そのままシリアライズできる</a>んだけど、
+上記の例の <code>CountVectorizer</code> のようにシリアライズできないものが含まれていると、当然 <code>Pipeline</code> 自体のシリアライズにも失敗するので注意。</p>
+
+<hr />
+
+<p>上記の例そのままだとシリアライズ周りで不都合があったり、ndarray のデータタイプを無理やり変換してたりと問題はあるけど、
+似たようなことをするときには参考になるんじゃないかなと思う。</p>
+
+<p>コードは <a href="https://github.com/tyamagu2/ja_text_classification_sample">https://github.com/tyamagu2/ja_text_classification_sample</a> にアップロードしてある。</p>
+
+        </div>
+        <div class="social">
+  <a class="twitter-share-button" href="https://twitter.com/intent/tweet" data-via="tyamagu2">Tweet</a>
+</div>
+
+      </article>
+    </main>
+    <footer id="site-footer">
+  <div class="container">
+    <hr>
+  </div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-71787010-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+<script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+  t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+  t._e.push(f);
+  };
+
+  return t;
+  }(document, "script", "twitter-wjs"));
+</script>
+
+  </body>
+</html>
