@@ -52,7 +52,7 @@
 &amp;hellip;&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;例えば以下の &lt;code&gt;WordDividor&lt;/code&gt; のようなクラスを作って、&lt;code&gt;extract_words&lt;/code&gt; インスタンスメソッドを &lt;code&gt;CountVector&lt;/code&gt; のコンストラクタに &lt;code&gt;analyzer&lt;/code&gt; 引数として渡す。&lt;/p&gt;
+&lt;p&gt;例えば以下の &lt;code&gt;WordDividor&lt;/code&gt; のようなクラスを作って、&lt;code&gt;extract_words&lt;/code&gt; インスタンスメソッドを &lt;code&gt;CountVectorizer&lt;/code&gt; のコンストラクタに &lt;code&gt;analyzer&lt;/code&gt; 引数として渡す。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;import MeCab
 from sklearn.feature_extraction.text import CountVectorizer
@@ -117,7 +117,7 @@ if __name__ == &#39;__main__&#39;:
 &lt;p&gt;あと、この例ではやってないけど、&lt;a href=&#34;https://github.com/neologd/mecab-ipadic-neologd&#34;&gt;mecab-ipadic-neologd&lt;/a&gt; を使うようにしたり、
 &lt;a href=&#34;https://github.com/neologd/mecab-ipadic-neologd/wiki/Regexp&#34;&gt;この辺&lt;/a&gt;を参考にテキストを事前に正規化したりすると良いと思う。&lt;/p&gt;
 
-&lt;p&gt;一つ注意点として、この &lt;code&gt;CountVector&lt;/code&gt; のインスタンスはそのままではシリアライズできない。
+&lt;p&gt;一つ注意点として、この &lt;code&gt;CountVectorizer&lt;/code&gt; のインスタンスはそのままではシリアライズできない。
 いろいろ調べたところ、&lt;code&gt;WordDividor&lt;/code&gt; のインスタンスメソッドを保持しているのが問題らしい。
 &lt;code&gt;pickle&lt;/code&gt; だけじゃなくて、&lt;code&gt;dill&lt;/code&gt; みたいなライブラリを使っても同様だった。&lt;/p&gt;
 
@@ -126,10 +126,10 @@ if __name__ == &#39;__main__&#39;:
 そうすると今度は &lt;code&gt;analyzer&lt;/code&gt; の呼び出しのたびに &lt;code&gt;Tagger&lt;/code&gt; の初期化が走ってとても時間がかかる。
 この辺、なんかうまい解決策があれば良いのだけど。&lt;/p&gt;
 
-&lt;p&gt;いちおう対策として、&lt;code&gt;CountVector&lt;/code&gt; のインスタンスをシリアライズする代わりに、&lt;code&gt;vocabulary_&lt;/code&gt; アトリビュートをシリアライズして保存しておく方法がある。
-デシリアライズ時は &lt;code&gt;CountVector&lt;/code&gt; のコンストラクタの &lt;code&gt;vocabulary&lt;/code&gt; 引数にデシリアライズした &lt;code&gt;vocabulary_&lt;/code&gt; を、
+&lt;p&gt;いちおう対策として、&lt;code&gt;CountVectorizer&lt;/code&gt; のインスタンスをシリアライズする代わりに、&lt;code&gt;vocabulary_&lt;/code&gt; アトリビュートをシリアライズして保存しておく方法がある。
+デシリアライズ時は &lt;code&gt;CountVectorizer&lt;/code&gt; のコンストラクタの &lt;code&gt;vocabulary&lt;/code&gt; 引数にデシリアライズした &lt;code&gt;vocabulary_&lt;/code&gt; を、
 &lt;code&gt;analyzer&lt;/code&gt; 引数にはシリアライズ時と同じセットアップした &lt;code&gt;WordDividor&lt;/code&gt; インスタンスの &lt;code&gt;extract_words&lt;/code&gt; を渡すようにすれば、
-同じ状態の &lt;code&gt;CountVector&lt;/code&gt; が作れる。&lt;/p&gt;
+同じ状態の &lt;code&gt;CountVectorizer&lt;/code&gt; が作れる。&lt;/p&gt;
 
 &lt;h3 id=&#34;テキスト以外の特徴量も使うにはどうすればよいのか&#34;&gt;テキスト以外の特徴量も使うにはどうすればよいのか？&lt;/h3&gt;
 

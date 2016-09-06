@@ -83,7 +83,7 @@
 &hellip;</p>
 </blockquote>
 
-<p>例えば以下の <code>WordDividor</code> のようなクラスを作って、<code>extract_words</code> インスタンスメソッドを <code>CountVector</code> のコンストラクタに <code>analyzer</code> 引数として渡す。</p>
+<p>例えば以下の <code>WordDividor</code> のようなクラスを作って、<code>extract_words</code> インスタンスメソッドを <code>CountVectorizer</code> のコンストラクタに <code>analyzer</code> 引数として渡す。</p>
 
 <pre><code>import MeCab
 from sklearn.feature_extraction.text import CountVectorizer
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 <p>あと、この例ではやってないけど、<a href="https://github.com/neologd/mecab-ipadic-neologd">mecab-ipadic-neologd</a> を使うようにしたり、
 <a href="https://github.com/neologd/mecab-ipadic-neologd/wiki/Regexp">この辺</a>を参考にテキストを事前に正規化したりすると良いと思う。</p>
 
-<p>一つ注意点として、この <code>CountVector</code> のインスタンスはそのままではシリアライズできない。
+<p>一つ注意点として、この <code>CountVectorizer</code> のインスタンスはそのままではシリアライズできない。
 いろいろ調べたところ、<code>WordDividor</code> のインスタンスメソッドを保持しているのが問題らしい。
 <code>pickle</code> だけじゃなくて、<code>dill</code> みたいなライブラリを使っても同様だった。</p>
 
@@ -157,10 +157,10 @@ if __name__ == '__main__':
 そうすると今度は <code>analyzer</code> の呼び出しのたびに <code>Tagger</code> の初期化が走ってとても時間がかかる。
 この辺、なんかうまい解決策があれば良いのだけど。</p>
 
-<p>いちおう対策として、<code>CountVector</code> のインスタンスをシリアライズする代わりに、<code>vocabulary_</code> アトリビュートをシリアライズして保存しておく方法がある。
-デシリアライズ時は <code>CountVector</code> のコンストラクタの <code>vocabulary</code> 引数にデシリアライズした <code>vocabulary_</code> を、
+<p>いちおう対策として、<code>CountVectorizer</code> のインスタンスをシリアライズする代わりに、<code>vocabulary_</code> アトリビュートをシリアライズして保存しておく方法がある。
+デシリアライズ時は <code>CountVectorizer</code> のコンストラクタの <code>vocabulary</code> 引数にデシリアライズした <code>vocabulary_</code> を、
 <code>analyzer</code> 引数にはシリアライズ時と同じセットアップした <code>WordDividor</code> インスタンスの <code>extract_words</code> を渡すようにすれば、
-同じ状態の <code>CountVector</code> が作れる。</p>
+同じ状態の <code>CountVectorizer</code> が作れる。</p>
 
 <h3 id="テキスト以外の特徴量も使うにはどうすればよいのか">テキスト以外の特徴量も使うにはどうすればよいのか？</h3>
 
